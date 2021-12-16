@@ -548,4 +548,104 @@ const groundPlain = {
    };
    
    
-  
+   /**
+    * Setup scene 
+    */
+   const setupScene = () => {
+    const scene = new THREE.Scene();
+   
+    // track mouse movement 
+    let mouse = { 
+     x: deviceInfo.screenCenterX(), 
+     y: deviceInfo.screenCenterY(), 
+    };  
+    
+    // setup renderer 
+    const renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, precision: 'mediump' } );
+    renderer.setSize( deviceInfo.screenWidth(), deviceInfo.screenHeight() );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setClearColor( 0x000000, 0 );
+    renderer.sortObjects = true;
+    renderer.domElement.setAttribute( 'id', 'stageElement' );
+    document.body.appendChild( renderer.domElement );
+   
+    // setup camera 
+    const camera = new THREE.PerspectiveCamera( 60, deviceInfo.screenRatio(), 0.1, 20000 );
+    camera.position.set( 0, 0, 300 );
+    camera.rotation.set( 0, 0, 0 );
+    camera.lookAt( scene.position );
+    
+    // setup light source 
+    const light = new THREE.PointLight( 0xffffff, 4, 1000 );
+    light.position.set( 0, 200, -500 );
+    light.castShadow = false;
+    light.target = scene;
+    light.color = commonColor;
+    scene.add( light ); 
+    
+    // setup objects 
+    starField.create( scene ); 
+    mountains.create( scene ); 
+    groundPlain.create( scene ); 
+    gunShip.create( scene ); 
+    
+    // on page resize
+    window.addEventListener( 'resize', e => {
+     camera.aspect = deviceInfo.screenRatio(); 
+     camera.updateProjectionMatrix();
+     renderer.setSize( deviceInfo.screenWidth(), deviceInfo.screenHeight() );
+    });
+    
+    // on mouse move 
+    window.addEventListener( 'mousemove', e => {
+     mouse.x = deviceInfo.mouseCenterX( e ); 
+     mouse.y = deviceInfo.mouseCenterY( e ); 
+    });
+   
+    // on mouse wheel
+    window.addEventListener( 'wheel', e => {
+     gunShip.onScroll( e ); 
+    });
+    
+    // on mouse click
+    window.addEventListener( 'click', e => {
+     gunShip.onClick( e ); 
+    });
+    
+    // autostart music 
+    const isff = ( typeof InstallTrigger !== 'undefined' );
+    if ( startMusic && isff ) musicHelper.play(); 
+    
+    // animation loop 
+    const loop = () => {
+     requestAnimationFrame( loop ); 
+     
+     // add random shooting stars 
+     if ( Math.random() > 0.99 ) shootingStar.create( scene );
+     
+     // update light hue 
+     if ( cycleColor ) {
+      commonHue += 0.001; 
+      if ( commonHue >= 1 ) commonHue = 0; 
+      commonColor.setHSL( commonHue, .8, .5 );
+     }
+     // update objects 
+     shootingStar.update( mouse );
+     starField.update( mouse ); 
+     mountains.update( mouse ); 
+     groundPlain.update( mouse ); 
+     gunShip.update( mouse ); 
+     
+     // render scene 
+     renderer.render( scene, camera );
+    };
+    
+    loop();
+   };
+   
+   // init 
+   LoaderHelper.onReady( setupScene );
+   LoaderHelper.loadTexture( 'starTexture', 'images/star.png' ); 
+   LoaderHelper.loadTexture( 'mountainTexture', 'images/terrain2.jpg' ); 
+   LoaderHelper.loadTexture( 'engineTexture', 'images/water.jpg' ); 
+   LoaderHelper.loadGeometry( 'shipGeometry', 'models/SpaceFighter03/SpaceFighter03.obj' ); 

@@ -104,7 +104,7 @@ const musicHelper = (function(){
  * Loader Helper
  */
 const LoaderHelper = {
- _base: 'https://raw.githubusercontent.com/rainner/codepen-assets/master/',
+ _base: "./assets/",
  _data: {}, 
  _loaded: 0, 
  _cb: null,
@@ -645,7 +645,7 @@ const groundPlain = {
    
    // init 
    LoaderHelper.onReady( setupScene );
-   LoaderHelper.loadTexture( 'starTexture', 'images/star.png' ); 
-   LoaderHelper.loadTexture( 'mountainTexture', 'images/terrain2.jpg' ); 
-   LoaderHelper.loadTexture( 'engineTexture', 'images/water.jpg' ); 
-   LoaderHelper.loadGeometry( 'shipGeometry', 'models/SpaceFighter03/SpaceFighter03.obj' ); 
+   LoaderHelper.loadTexture( 'starTexture', 'star.png' ); 
+   LoaderHelper.loadTexture( 'mountainTexture', 'terrain.jpg' ); 
+   LoaderHelper.loadTexture( 'engineTexture', 'water.jpg' ); 
+   LoaderHelper.loadGeometry( 'shipGeometry', 'SpaceFighter.obj' ); 

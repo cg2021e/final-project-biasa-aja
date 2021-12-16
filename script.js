@@ -399,3 +399,153 @@ const groundPlain = {
   addEase( this.group.rotation, this.look, this.ease );
  },
 };
+/**
+ * Ship object
+ */
+ const gunShip = {
+    scene: null, 
+    group: null,
+    engineTexture: null, 
+    gunSound: 'Sound/Laser_effect/Sound_Effect-Laser.mp3', 
+    shots: [], 
+    ease: 12, 
+    move: { x: 0, y: 0, z: -40 },
+    look: { x: 0, y: 0, z: 0 }, 
+   
+    // create
+    create( scene ) {
+     this.scene = scene; 
+     this.group = new THREE.Object3D();
+     this.group.position.set( this.move.x, this.move.y, this.move.z );
+     this.group.rotation.set( this.look.x, this.look.y, this.look.z );
+     
+     let material = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      blending: THREE.NoBlending,
+      side: THREE.FrontSide,
+      transparent: false,
+      depthTest: true,
+      wireframe: false, 
+     });
+     
+     let light = new THREE.PointLight( 0xffffff, .4, 600 );
+     light.position.set( 0, 0, 600 );
+     
+     let ship = LoaderHelper.get( 'shipGeometry' );
+     ship.position.set( 0, 0, 300 );
+     ship.rotation.set( 0, Math.PI, 0 );
+     ship.traverse( child => {
+       if ( child instanceof THREE.Mesh ) {
+        child.material = material;
+       }
+     });
+     
+     this.setupEngine();
+     this.playGunSound( false ); 
+     this.group.add( ship ); 
+     this.group.add( light ); 
+     scene.add( this.group ); 
+    },
+    
+    // create jet engine effect
+    setupEngine() {
+     this.engineTexture = LoaderHelper.get( 'engineTexture' );
+     this.engineTexture.wrapT = THREE.RepeatWrapping;
+     this.engineTexture.wrapS = THREE.RepeatWrapping;
+     
+     let material = new THREE.MeshBasicMaterial({
+      color: 0x0099ff,
+      opacity: 1,
+      alphaMap: this.engineTexture,
+      blending: THREE.AdditiveBlending,
+      side: THREE.FrontSide,
+      transparent: true,
+      depthTest: true,
+     });
+     
+     let cylinder = new THREE.Mesh( new THREE.CylinderGeometry( 0, .4, 8, 32, 32, true ), material );
+     cylinder.position.set( 0, .4, 307 );
+     cylinder.rotation.x = Math.PI / 2;
+     this.group.add( cylinder ); 
+    }, 
+    
+    // update engine burn effect 
+    updateEngine() {
+     this.engineTexture.offset.y -= 0.06;
+     this.engineTexture.needsUpdate = true;
+    }, 
+    
+    // move ship on scroll 
+    onScroll( e ) {
+     let z = this.move.z; 
+     let d = z + ( e.deltaY | 0 ); 
+     d = ( d < -130 ) ? -130 : d;
+     d = ( d > -30 ) ? -30 : d;
+     this.move.z = d;
+    }, 
+    
+    // add gun fire on click 
+    onClick( e ) {
+     let p = this.group.position; 
+     
+     let color = new THREE.Color();
+     color.setHSL( Math.random(), 1, .5 );
+     
+     let geometry = new THREE.CylinderGeometry( .3, 0, 20, 10 );
+     let material = new THREE.MeshBasicMaterial({
+      color,
+      opacity: .8,
+      blending: THREE.AdditiveBlending,
+      side: THREE.FrontSide,
+      transparent: false,
+      depthTest: true,
+     });
+     
+     let cylinder = new THREE.Mesh( geometry, material );
+     cylinder.position.set( p.x, p.y, p.z + 290 );
+     cylinder.rotation.set( 11, 0, 0 );
+     
+     this.shots.push( cylinder ); 
+     this.scene.add( cylinder ); 
+     this.playGunSound( true ); 
+    }, 
+    
+    // gun sound
+    playGunSound( play ) {
+     let audio = new Audio( this.gunSound );
+     if ( play ) {
+      audio.volume = 0.5;
+      audio.play();
+     }
+    }, 
+    
+    // update gun shots 
+    updateShots() {
+     for ( let i = 0; i < this.shots.length; i++ ) {
+      let cylinder = this.shots[ i ]; 
+      
+      if ( cylinder.position.z < -300 ) {
+       this.shots.splice( i, 1 ); 
+       this.scene.remove( cylinder ); 
+       continue;
+      }
+      cylinder.position.z -= 6; 
+     }
+    }, 
+    
+    // update
+    update( mouse ) {
+     this.move.x =  ( mouse.x * 0.05 );
+     this.move.y = -( mouse.y * 0.04 ) - 4;
+     this.look.z =  ( mouse.x * 0.0004 );
+     
+     this.updateShots();
+     this.updateEngine();
+   
+     addEase( this.group.position, this.move, this.ease );
+     addEase( this.group.rotation, this.look, this.ease );
+    },
+   };
+   
+   
+  

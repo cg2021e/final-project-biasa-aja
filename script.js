@@ -648,4 +648,4 @@ const groundPlain = {
    LoaderHelper.loadTexture( 'starTexture', 'star.png' ); 
    LoaderHelper.loadTexture( 'mountainTexture', 'terrain.jpg' ); 
    LoaderHelper.loadTexture( 'engineTexture', 'water.jpg' ); 
-   LoaderHelper.loadGeometry( 'shipGeometry', 'SpaceFighter.obj' ); 
+   LoaderHelper.loadGeometry( 'shipGeometry', 'SpaceFighter03.obj' ); 

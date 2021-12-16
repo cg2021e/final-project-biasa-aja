@@ -99,6 +99,114 @@ const musicHelper = (function(){
 })();
 
 
+
+/**
+ * Loader Helper
+ */
+const LoaderHelper = {
+ _base: 'https://raw.githubusercontent.com/rainner/codepen-assets/master/',
+ _data: {}, 
+ _loaded: 0, 
+ _cb: null,
+ 
+ // get loaded resource by name  
+ get( name ) {
+  return this._data[ name ] || null; 
+ }, 
+ 
+ // complete handler 
+ onReady( cb ) {
+  this._cb = cb; 
+ }, 
+ 
+ // common error handler 
+ onError( err ) {
+  console.error( err.message || err ); 
+ }, 
+ 
+ // when a resource is loaded 
+ onData( name, data ) {
+  this._loaded += 1;
+  this._data[ name ] = data; 
+  let total  = Object.keys( this._data ).length; 
+  let loaded = ( total && this._loaded === total ); 
+  let hascb  = ( typeof this._cb === 'function' ); 
+  if ( loaded && hascb ) this._cb( total ); 
+ }, 
+ 
+ // custom .obj file 
+ loadGeometry( name, file ) {
+  if ( !name || !file ) return;
+  this._data[ name ] = new THREE.Object3D(); 
+  const path = this._base +'/'+ file; 
+  const loader = new THREE.OBJLoader();
+  loader.load( path, data => { this.onData( name, data ) }, null, this.onError );
+ }, 
+ 
+ // load image file 
+ loadTexture( name, file ) {
+  if ( !name || !file ) return;
+  this._data[ name ] = new THREE.Texture(); 
+  const path = this._base +'/'+ file; 
+  const loader = new THREE.TextureLoader();
+  loader.load( path, data => { this.onData( name, data ) }, null, this.onError );
+ },
+};
+
+
+/**
+ * Helper for adding easing effect 
+ */
+const addEase = ( pos, to, ease ) => {
+ pos.x += ( to.x - pos.x ) / ease;
+ pos.y += ( to.y - pos.y ) / ease;
+ pos.z += ( to.z - pos.z ) / ease;
+};
+
+/**
+ * Shooting star object 
+ */
+const shootingStar = {
+ scene: null, 
+ stars: [], 
+ spread: 1000, 
+ 
+ // create
+ create( scene ) {
+  this.scene = scene; 
+  let geometry = new THREE.CylinderGeometry( 0, 2, 120, 10 );
+  let material = new THREE.MeshBasicMaterial({
+   color: 0xffffcc,
+   opacity: .4,
+   blending: THREE.AdditiveBlending,
+   side: THREE.FrontSide,
+   transparent: false,
+   depthTest: true,
+  });
+  
+  let randx = THREE.Math.randInt( -this.spread, this.spread ); 
+  let cylinder = new THREE.Mesh( geometry, material );
+  cylinder.position.set( randx, 300, 200 );
+  cylinder.rotation.set( Math.PI / 2, 0, 0 );
+  this.stars.push( cylinder ); 
+  this.scene.add( cylinder ); 
+ },
+ 
+ // update
+ update( mouse ) {
+  for ( let i = 0; i < this.stars.length; i++ ) {
+   let cylinder = this.stars[ i ]; 
+   
+   if ( cylinder.position.z < -3000 ) {
+    this.stars.splice( i, 1 ); 
+    this.scene.remove( cylinder ); 
+    continue;
+   }
+   cylinder.position.z -= 20; 
+  }
+ },
+};
+
 /**
  * Objek Bintang
  */

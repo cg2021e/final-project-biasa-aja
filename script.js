@@ -207,6 +207,7 @@ const shootingStar = {
  },
 };
 
+
 /**
  * Objek Bintang
  */
